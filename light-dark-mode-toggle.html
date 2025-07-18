@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Light/Dark Mode Toggle Demo</title>
+    <style>
+        /* CSS Variables for Theme Colors */
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border-color: #e2e8f0;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --input-bg: #ffffff;
+            --card-bg: #ffffff;
+            --modal-bg: #ffffff;
+            --modal-overlay: rgba(0, 0, 0, 0.5);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --border-color: #475569;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+            --accent: #60a5fa;
+            --accent-hover: #3b82f6;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #f87171;
+            --input-bg: #1e293b;
+            --card-bg: #1e293b;
+            --modal-bg: #1e293b;
+            --modal-overlay: rgba(0, 0, 0, 0.7);
+        }
+
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 50px;
+            padding: 8px;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 60px;
+            height: 40px;
+        }
+
+        .theme-toggle:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-1px);
+        }
+
+        .theme-icon {
+            width: 20px;
+            height: 20px;
+            transition: all 0.3s ease;
+            fill: var(--text-primary);
+        }
+
+        .theme-toggle .sun-icon {
+            opacity: 1;
+            transform: rotate(0deg);
+        }
+
+        .theme-toggle .moon-icon {
+            opacity: 0;
+            transform: rotate(180deg);
+            position: absolute;
+        }
+
+        [data-theme="dark"] .theme-toggle .sun-icon {
+            opacity: 0;
+            transform: rotate(180deg);
+        }
+
+        [data-theme="dark"] .theme-toggle .moon-icon {
+            opacity: 1;
+            transform: rotate(0deg);
+        }
+
+        /* Container and Layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin: 60px 0 40px 0;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--accent), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Cards */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin: 40px 0;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .card p {
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Form Elements */
+        .form-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 32px;
+            margin: 40px 0;
+            box-shadow: var(--shadow);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        select.form-control {
+            cursor: pointer;
+        }
+
+        /* Checkbox and Radio */
+        .checkbox-group, .radio-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0;
+        }
+
+        .checkbox, .radio {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border-color);
+            background: var(--input-bg);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox {
+            border-radius: 4px;
+        }
+
+        .radio {
+            border-radius: 50%;
+        }
+
+        .checkbox:checked, .radio:checked {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* Links */
+        a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: var(--accent-hover);
+            text-decoration: underline;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--modal-overlay);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--modal-bg);
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        /* Navigation */
+        .nav {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px 24px;
+            margin: 20px 0;
+            box-shadow: var(--shadow);
+        }
+
+        .nav-list {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--accent);
+        }
+
+        /* Status Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        /* Progress Bar */
+        .progress {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 16px 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .nav-list {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+
+            .theme-toggle {
+                top: 16px;
+                right: 16px;
+            }
+        }
+
+        /* Animation for theme transition */
+        * {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <svg class="theme-icon sun-icon" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="5"/>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+        </svg>
+        <svg class="theme-icon moon-icon" viewBox="0 0 24 24">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+    </button>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>Modern Light/Dark Mode</h1>
+            <p>A complete, responsive theme toggle system with smooth transitions and persistent storage. Every element adapts beautifully to both light and dark modes.</p>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <ul class="nav-list">
+                <li><a href="#" class="nav-link active">Home</a></li>
+                <li><a href="#" class="nav-link">About</a></li>
+                <li><a href="#" class="nav-link">Services</a></li>
+                <li><a href="#" class="nav-link">Portfolio</a></li>
+                <li><a href="#" class="nav-link">Contact</a></li>
+            </ul>
+        </nav>
+
+        <!-- Card Grid -->
+        <div class="card-grid">
+            <div class="card">
+                <h3>🌟 Feature One</h3>
+                <p>This card demonstrates how all elements adapt to the selected theme. Notice the smooth transitions and consistent styling.</p>
+                <div class="badge badge-success">Active</div>
+                <div class="progress">
+                    <div class="progress-bar" style="width: 75%"></div>
+                </div>
+                <button class="btn btn-primary">Learn More</button>
+            </div>
+
+            <div class="card">
+                <h3>🚀 Feature Two</h3>
+                <p>Interactive elements like buttons, links, and form controls all maintain their elegance in both light and dark modes.</p>
+                <div class="badge badge-warning">In Progress</div>
+                <div class="progress">
+                    <div class="progress-bar" style="width: 45%"></div>
+                </div>
+                <button class="btn btn-secondary">View Details</button>
+            </div>
+
+            <div class="card">
+                <h3>💡 Feature Three</h3>
+                <p>The theme preference is stored in localStorage, so your choice persists across browser sessions and page reloads.</p>
+                <div class="badge badge-danger">Urgent</div>
+                <div class="progress">
+                    <div class="progress-bar" style="width: 90%"></div>
+                </div>
+                <button class="btn btn-success">Get Started</button>
+            </div>
+        </div>
+
+        <!-- Form Section -->
+        <div class="form-section">
+            <h2 style="margin-bottom: 24px;">Contact Form</h2>
+            <form>
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" class="form-control" placeholder="Enter your full name">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" class="form-control" placeholder="your.email@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <select id="subject" class="form-control">
+                        <option>General Inquiry</option>
+                        <option>Technical Support</option>
+                        <option>Business Partnership</option>
+                        <option>Feedback</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <textarea id="message" class="form-control" placeholder="Write your message here..."></textarea>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="newsletter" class="checkbox">
+                    <label for="newsletter">Subscribe to our newsletter</label>
+                </div>
+
+                <div class="radio-group">
+                    <input type="radio" id="urgent" name="priority" class="radio">
+                    <label for="urgent">Urgent</label>
+                </div>
+
+                <div class="radio-group">
+                    <input type="radio" id="normal" name="priority" class="radio" checked>
+                    <label for="normal">Normal Priority</label>
+                </div>
+
+                <div style="margin-top: 24px; display: flex; gap: 12px;">
+                    <button type="submit" class="btn btn-primary">Send Message</button>
+                    <button type="button" class="btn btn-secondary">Save Draft</button>
+                    <button type="button" class="btn btn-warning" onclick="openModal()">Preview</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Additional Content -->
+        <div class="card">
+            <h3>🎨 Theme Features</h3>
+            <p>This implementation includes:</p>
+            <ul style="margin: 16px 0; padding-left: 20px; color: var(--text-secondary);">
+                <li>Smooth transitions between themes</li>
+                <li>Persistent theme storage in localStorage</li>
+                <li>Complete styling for all interactive elements</li>
+                <li>Responsive design that works on all devices</li>
+                <li>Modern, clean aesthetic in both modes</li>
+                <li>Semantic HTML and accessible markup</li>
+            </ul>
+            <p>Try switching between light and dark modes using the toggle in the top-right corner. Notice how every element transitions smoothly and maintains its visual hierarchy.</p>
+            <a href="#" style="display: inline-block; margin-top: 12px;">Learn more about implementation →</a>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Preview Modal</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>This modal demonstrates how overlays and dialogs adapt to the current theme. The backdrop, content area, and all interactive elements maintain consistent styling.</p>
+                <div class="form-group" style="margin: 20px 0;">
+                    <label for="modal-input">Sample Input</label>
+                    <input type="text" id="modal-input" class="form-control" placeholder="Type something...">
+                </div>
+                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+                    <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button class="btn btn-primary">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Management System
+        class ThemeManager {
+            constructor() {
+                this.theme = 'light'; // Default theme
+                this.toggleButton = document.getElementById('themeToggle');
+                this.init();
+            }
+
+            init() {
+                // Load saved theme or default to light
+                this.loadTheme();
+                
+                // Set up event listeners
+                this.toggleButton.addEventListener('click', () => this.toggleTheme());
+                
+                // Apply initial theme
+                this.applyTheme();
+            }
+
+            loadTheme() {
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
+                    this.theme = savedTheme;
+                } else {
+                    this.theme = 'light'; // Default to light mode
+                }
+            }
+
+            saveTheme() {
+                localStorage.setItem('theme', this.theme);
+            }
+
+            toggleTheme() {
+                this.theme = this.theme === 'light' ? 'dark' : 'light';
+                this.applyTheme();
+                this.saveTheme();
+            }
+
+            applyTheme() {
+                document.documentElement.setAttribute('data-theme', this.theme);
+                
+                // Update toggle button aria-label for accessibility
+                const label = this.theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode';
+                this.toggleButton.setAttribute('aria-label', label);
+            }
+
+            getCurrentTheme() {
+                return this.theme;
+            }
+        }
+
+        // Modal Management
+        function openModal() {
+            const modal = document.getElementById('modalOverlay');
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modalOverlay');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Navigation active state management
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remove active class from all links
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                
+                // Add active class to clicked link
+                this.classList.add('active');
+            });
+        });
+
+        // Form validation example
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            
+            if (!name || !email) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+            
+            alert('Form submitted successfully! (This is just a demo)');
+        });
+
+        // Initialize theme manager when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            window.themeManager = new ThemeManager();
+        });
+
+        // Progress bar animation
+        function animateProgressBars() {
+            const progressBars = document.querySelectorAll('.progress-bar');
+            progressBars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
+        }
+
+        // Animate progress bars on load
+        window.addEventListener('load', animateProgressBars);
+    </script>
+</body>
+</html>
