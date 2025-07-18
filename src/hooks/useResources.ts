@@ -218,6 +218,53 @@ export function useResources() {
     }
   };
 
+  const addResource = async (resourceData: Omit<Resource, 'id' | 'created_at' | 'updated_at'>) => {
+    try {
+      const { data, error } = await supabase
+        .from('resources')
+        .insert([{
+          ...resourceData,
+          verification_status: 'pending',
+          approved: false,
+          is_user_submitted: true
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return { success: true, data };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Failed to add resource' 
+      };
+    }
+  };
+
+  const submitResourceEdit = async (resourceId: string, editData: Omit<ResourceEdit, 'id' | 'original_resource_id' | 'created_at' | 'updated_at' | 'verification_status' | 'verification_votes'>) => {
+    try {
+      const { data, error } = await supabase
+        .from('resource_edits')
+        .insert([{
+          ...editData,
+          original_resource_id: resourceId,
+          verification_status: 'pending',
+          verification_votes: 0
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return { success: true, data };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Failed to submit edit' 
+      };
+    }
+  };
   useEffect(() => {
     fetchResources();
     fetchPendingEdits();
@@ -325,6 +372,8 @@ export function useResources() {
     deleteResource,
     approveResource,
     rejectResource,
+    addResource,
+    submitResourceEdit,
     refetch: fetchResources
   };
 }
