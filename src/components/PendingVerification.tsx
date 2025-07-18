@@ -67,6 +67,30 @@ function PendingVerification({ onResourceVerified }: PendingVerificationProps) {
     const itemId = resourceId || editId;
     if (!itemId) return;
 
+    // If voting helpful on an edit, approve it automatically
+    if (editId && voteType === 'helpful') {
+      const { approveEdit } = useResources();
+      const result = await approveEdit(editId);
+      
+      if (result.success) {
+        showToast('Edit approved and applied successfully!', 'success', 3000);
+        addCompletedVerification(itemId);
+        
+        setTimeout(() => {
+          setHiddenItems(prev => new Set([...prev, itemId]));
+          setAnimatingItems(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(itemId);
+            return newSet;
+          });
+        }, 800);
+        return;
+      } else {
+        showToast(result.error || 'Failed to approve edit', 'error');
+        return;
+      }
+    }
+
     console.log('Verification vote:', { resourceId, editId, voteType, itemId });
     // Start animation
     setAnimatingItems(prev => new Set([...prev, itemId]));

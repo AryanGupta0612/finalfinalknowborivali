@@ -92,56 +92,77 @@ function Resources() {
         )}
 
         {/* Recently Added */}
-        {!isAdmin && (
+        {!isAdmin && !searchQuery && (
           <div className="mb-12">
             <RecentlyAdded />
           </div>
         )}
 
         {/* Resource Grid */}
-        {displayResources.length === 0 ? (
+        {visibleResources.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24">
-            <h3 className="text-2xl font-semibold text-gray-900 mb-2">No resources found</h3>
-            <p className="text-gray-600 mb-4">There are currently no resources available.</p>
+            <h3 className="text-2xl font-semibold text-gray-900 mb-2">
+              {searchQuery ? 'No matching resources found' : 'No resources found'}
+            </h3>
+            <p className="text-gray-600 mb-4">
+              {searchQuery 
+                ? 'Try adjusting your search terms or browse all resources.' 
+                : 'There are currently no resources available.'
+              }
+            </p>
             <img src="https://illustrations.popsy.co/gray/empty-state.svg" alt="No resources" className="w-64 h-64 opacity-60" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {displayResources.map((resource) => (
-              isAdmin ? (
-                <AdminResourceCard
-                  key={resource.id}
-                  id={resource.id}
-                  name={resource.name}
-                  type={resource.type}
-                  address={resource.address}
-                  contact={resource.contact}
-                  email={resource.email}
-                  website={resource.website}
-                  description={resource.description}
-                  status={resource.status}
-                  hours={resource.hours}
-                  services={resource.services}
-                  verification_status={resource.verification_status}
-                />
-              ) : (
-                <ResourceCard
-                  key={resource.id}
-                  id={resource.id}
-                  name={resource.name}
-                  type={resource.type}
-                  address={resource.address}
-                  contact={resource.contact}
-                  email={resource.email}
-                  website={resource.website}
-                  description={resource.description}
-                  status={resource.status}
-                  hours={resource.hours}
-                  services={resource.services}
-                />
-              )
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {visibleResources.map((resource) => (
+                isAdmin ? (
+                  <AdminResourceCard
+                    key={resource.id}
+                    id={resource.id}
+                    name={resource.name}
+                    type={resource.type}
+                    address={resource.address}
+                    contact={resource.contact}
+                    email={resource.email}
+                    website={resource.website}
+                    description={resource.description}
+                    status={resource.status}
+                    hours={resource.hours}
+                    services={resource.services}
+                    verification_status={resource.verification_status}
+                  />
+                ) : (
+                  <ResourceCard
+                    key={resource.id}
+                    id={resource.id}
+                    name={resource.name}
+                    type={resource.type}
+                    address={resource.address}
+                    contact={resource.contact}
+                    email={resource.email}
+                    website={resource.website}
+                    description={resource.description}
+                    status={resource.status}
+                    hours={resource.hours}
+                    services={resource.services}
+                  />
+                )
+              ))}
+            </div>
+
+            {/* See More Button */}
+            {hasMore && (
+              <div className="flex justify-center mt-12">
+                <button
+                  onClick={() => setVisibleCount(prev => prev + 10)}
+                  className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-all duration-200 hover:scale-105 shadow-lg"
+                >
+                  See More ({displayResources.length - visibleCount} remaining)
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

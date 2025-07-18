@@ -372,6 +372,7 @@ export function useResources() {
     deleteResource,
     approveResource,
     rejectResource,
+    approveEdit,
     addResource,
     submitResourceEdit,
     refetch: fetchResources
