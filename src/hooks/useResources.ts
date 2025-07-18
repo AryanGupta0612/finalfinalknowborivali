@@ -266,6 +266,64 @@ export function useResources() {
     }
   };
   useEffect(() => {
+  const approveEdit = async (editId: string) => {
+    try {
+      // First, get the edit data
+      const { data: edit, error: editError } = await supabase
+        .from('resource_edits')
+        .select('*')
+        .eq('id', editId)
+        .single();
+
+      if (editError) throw editError;
+      if (!edit) throw new Error('Edit not found');
+
+      // Apply the edit to the original resource
+      if (edit.original_resource_id) {
+        const { error: updateError } = await supabase
+          .from('resources')
+          .update({
+            name: edit.name,
+            type: edit.type,
+            category: edit.category,
+            address: edit.address,
+            contact: edit.contact,
+            email: edit.email,
+            website: edit.website,
+            description: edit.description,
+            rating: edit.rating,
+            status: edit.status,
+            hours: edit.hours,
+            services: edit.services,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', edit.original_resource_id);
+
+        if (updateError) throw updateError;
+      }
+
+      // Mark the edit as approved and remove it
+      const { error: deleteError } = await supabase
+        .from('resource_edits')
+        .delete()
+        .eq('id', editId);
+
+      if (deleteError) throw deleteError;
+
+      // Refresh the data
+      await fetchResources();
+      await fetchAllResources();
+      await fetchPendingEdits();
+
+      return { success: true };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Failed to approve edit' 
+      };
+    }
+  };
+
     fetchResources();
     fetchPendingEdits();
 
